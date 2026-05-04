@@ -1,5 +1,6 @@
 <script setup>
 import { reactive, ref } from 'vue'
+const emit = defineEmits(['show-login'])
 
 const form = reactive({
   name: '',
@@ -153,6 +154,20 @@ const submit = async () => {
         <p v-if="message" class="mt-3 text-sm text-slate-900">
           {{ message }}
         </p>
+        <div class="mt-7 flex items-center justify-center gap-4 text-sm text-slate-600">
+          <span>Уже есть аккаунт?</span>
+
+          <button
+              type="button"
+              class="rounded-md border border-transparent px-2 py-1 font-semibold text-slate-900
+  transition hover:border-black hover:text-black hover:shadow-[0_0_12px_rgba(0,0,0,0.45)]
+  focus:outline-none focus:ring-2 focus:ring-black/40"
+              @click="emit('show-login')"
+          >
+            Войти
+          </button>
+        </div>
+
       </form>
     </section>
   </main>
