@@ -1,14 +1,54 @@
 <script setup>
-import {computed, ref} from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 const emit = defineEmits(['logout','show-login'])
 const totalSeconds = ref(25 * 60)
 const isRunning = ref(false)
 const intervalId = ref(null)
+const endTime = ref(null)
 const currentMode = ref('focus')
 const completedFocusSessions = ref(Number(localStorage.getItem('completedFocusSessions') ||
     0))
+const totalFocusSeconds = ref(0)
 const statusMessage = ref('')
+const showProgress = ref(false)
+const calendarDate = ref(new Date())
+const focusSessions = ref([])
+const selectedCalendarDay = ref(null)
+
+const selectedCalendarMonthLabel = computed(() => {
+  if (!selectedCalendarDay.value?.date) {
+    return ''
+  }
+
+  return selectedCalendarDay.value.date.toLocaleDateString('ru-RU', {
+    month: 'long',
+  })
+})
+
+const selectCalendarDay = (day) => {
+  if (!day.isCurrentMonth || !day.hasFocus) {
+    return
+  }
+
+  selectedCalendarDay.value = day
+}
+
+const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+const calendarMonthLabel = computed(() => {
+  return calendarDate.value.toLocaleDateString('ru-RU', {
+    month: 'long',
+  })
+})
+
+const todayFocusSeconds = ref(0)
+const todayFocusSessions = ref(0)
+
+const todayFocusMinutes = computed(() => {
+  return Math.floor(todayFocusSeconds.value / 60)
+})
+
+
 const props = defineProps({
   isAuth: {
     type: Boolean,
@@ -30,35 +70,63 @@ const modes = {
     seconds: 15 * 60,
   },
 }
-
 const formattedTime = computed(() => {
   const minutes = Math.floor(totalSeconds.value / 60)
   const seconds = totalSeconds.value % 60
-
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 })
+const totalFocusMinutes = computed(() => {
+  return Math.floor(totalFocusSeconds.value / 60)
+})
+const focusSessionsByDate = computed(() => {
+  return focusSessions.value.reduce((days, session) => {
+    const date = session.completed_at?.slice(0, 10)
+
+    if (!date) {
+      return days
+    }
+
+    if (!days[date]) {
+      days[date] = {
+        sessions: 0,
+        seconds: 0,
+      }
+    }
+
+    days[date].sessions++
+    days[date].seconds += session.duration_seconds
+
+    return days
+  }, {})
+})
+
 const startTimer = () => {
   if (isRunning.value) {
     return
   }
 
   isRunning.value = true
+  endTime.value = Date.now() + totalSeconds.value * 1000
 
   intervalId.value = setInterval(() => {
-    if (totalSeconds.value <= 1) {
+    const remaining = Math.ceil((endTime.value - Date.now()) / 1000)
+
+    if (remaining <= 0) {
       totalSeconds.value = 0
       completeTimer()
       return
     }
 
-    totalSeconds.value--
+    totalSeconds.value = remaining
   }, 1000)
 }
+
 
 const pauseTimer = () => {
   clearInterval(intervalId.value)
   intervalId.value = null
   isRunning.value = false
+  endTime.value = null
 }
 
 const toggleTimer = () => {
@@ -76,11 +144,13 @@ const selectMode = (mode) => {
   currentMode.value = mode
   totalSeconds.value = modes[mode].seconds
   statusMessage.value = ''
+  endTime.value = null
 }
 const completeTimer = async () => {
   clearInterval(intervalId.value)
   intervalId.value = null
   isRunning.value = false
+  endTime.value = null
 
   if (currentMode.value === 'focus') {
     completedFocusSessions.value++
@@ -106,15 +176,129 @@ const saveFocusSession = async () => {
     localStorage.setItem('completedFocusSessions', completedFocusSessions.value)
     return
   }
+  const token = localStorage.getItem('token')
 
-  // Позже здесь будет запрос в Laravel для сохранения статистики.
+  const response = await fetch('http://localhost:8080/api/focus-sessions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      mode: 'focus',
+      duration_seconds: modes.focus.seconds,
+    }),
+  })
+
+  if (!response.ok) {
+    const data = await response.json()
+    statusMessage.value = data.message || 'Не удалось сохранить статистику'
+    return
+  }
+  totalFocusSeconds.value += modes.focus.seconds
+  todayFocusSessions.value++
+  todayFocusSeconds.value += modes.focus.seconds
   localStorage.setItem('completedFocusSessions', completedFocusSessions.value)
 }
+const loadFocusSessions = async () => {
+  if (!props.isAuth) {
+    return
+  }
+
+  const token = localStorage.getItem('token')
+
+  const response = await fetch('http://localhost:8080/api/focus-sessions', {
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  })
+
+  if (!response.ok) {
+    return
+  }
+
+  const data = await response.json()
+  focusSessions.value = data.statistics
+  completedFocusSessions.value = data.statistics.length
+  totalFocusSeconds.value = data.statistics.reduce((sum, session) => {
+    return sum + session.duration_seconds
+  }, 0)
+  const today = new Date().toISOString().slice(0, 10)
+
+  const todayStatistics = data.statistics.filter((session) => {
+    return session.completed_at?.slice(0, 10) === today
+  })
+
+  todayFocusSessions.value = todayStatistics.length
+  todayFocusSeconds.value = todayStatistics.reduce((sum, session) => {
+    return sum + session.duration_seconds
+  }, 0)
+
+}
+onMounted(() => {
+  loadFocusSessions()
+})
+const previousCalendarMonth = () => {
+  calendarDate.value = new Date(
+      calendarDate.value.getFullYear(),
+      calendarDate.value.getMonth() - 1,
+      1
+  )
+}
+
+const nextCalendarMonth = () => {
+  calendarDate.value = new Date(
+      calendarDate.value.getFullYear(),
+      calendarDate.value.getMonth() + 1,
+      1
+  )
+}
+
+const calendarDays = computed(() => {
+  const year = calendarDate.value.getFullYear()
+  const month = calendarDate.value.getMonth()
+
+  const firstDay = new Date(year, month, 1)
+  const lastDay = new Date(year, month + 1, 0)
+
+  const days = []
+
+  const firstWeekDay = (firstDay.getDay() + 6) % 7
+
+  for (let i = 0; i < firstWeekDay; i++) {
+    days.push({
+      date: null,
+      day: '',
+      isCurrentMonth: false,
+    })
+  }
+
+  for (let day = 1; day <= lastDay.getDate(); day++) {
+    const date = new Date(year, month, day)
+    const dateKey = date.toISOString().slice(0, 10)
+    const focusStats = focusSessionsByDate.value[dateKey]
+
+    days.push({
+      date,
+      day,
+      isCurrentMonth: true,
+      sessions: focusStats?.sessions || 0,
+      minutes: Math.floor((focusStats?.seconds || 0) / 60),
+      hasFocus: Boolean(focusStats),
+    })
+  }
+
+  return days
+})
+
 
 const resetTimer = () => {
   clearInterval(intervalId.value)
   intervalId.value = null
   isRunning.value = false
+  endTime.value = null
   totalSeconds.value = modes[currentMode.value].seconds
 
 }
@@ -155,16 +339,122 @@ const resetLocalStats = () => {
 
       <div class="mb-6 flex items-center justify-center gap-3 text-sm font-semibold text-slate-
   700">
-        <span>Завершено фокус-сессий: {{ completedFocusSessions }}</span>
+        <template v-if="isAuth">
+      <span>
+        Сегодня: {{ todayFocusSessions }} сессий / {{ todayFocusMinutes }} мин
+      </span>
 
-        <button
-            type="button"
-            class="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700
-  transition hover:border-black hover:text-black"
-            @click="resetLocalStats"
-        >
-          Сбросить
-        </button>
+          <button
+              type="button"
+              class="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-
+  700 transition hover:border-black hover:text-black"
+              @click="showProgress = true"
+          >
+            Прогресс
+          </button>
+        </template>
+
+        <template v-else>
+          <span>Завершено фокус-сессий: {{ completedFocusSessions }}</span>
+
+          <button
+              type="button"
+              class="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-
+  700 transition hover:border-black hover:text-black"
+              @click="resetLocalStats"
+          >
+            Сбросить
+          </button>
+        </template>
+      </div>
+      <div
+          v-if="showProgress"
+          class="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4 text-left"
+      >
+        <div class="mb-3 flex items-center justify-between gap-3">
+          <h2 class="text-lg font-bold text-slate-900">
+            Прогресс
+          </h2>
+
+          <button
+              type="button"
+              class="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-
+  700 transition hover:border-black hover:text-black"
+              @click="showProgress = false"
+          >
+            Закрыть
+          </button>
+        </div>
+
+        <div class="grid gap-2 text-sm text-slate-700">
+          <p>Всего сессий: {{ completedFocusSessions }}</p>
+          <p>Всего минут: {{ totalFocusMinutes }}</p>
+          <p>Сегодня: {{ todayFocusSessions }} сессий / {{ todayFocusMinutes }} мин</p>
+          <p v-if="selectedCalendarDay">
+            Выбрано: {{ selectedCalendarDay.day }} {{ selectedCalendarMonthLabel }} -
+            {{ selectedCalendarDay.sessions }} сессий /
+            {{ selectedCalendarDay.minutes }} мин
+          </p>
+
+          <div class="mt-5">
+            <div class="mb-3 flex items-center justify-between">
+              <button
+                  type="button"
+                  class="rounded-md px-2 py-1 text-slate-500 transition hover:bg-slate-200 hover:text-
+  slate-900"
+                  @click="previousCalendarMonth"
+              >
+                ‹
+              </button>
+
+              <h3 class="font-semibold capitalize text-slate-900">
+                {{ calendarMonthLabel }}
+              </h3>
+
+              <button
+                  type="button"
+                  class="rounded-md px-2 py-1 text-slate-500 transition hover:bg-slate-200 hover:text-
+  slate-900"
+                  @click="nextCalendarMonth"
+              >
+                ›
+              </button>
+            </div>
+
+            <div class="mb-2 grid grid-cols-7 gap-1 text-center text-xs font-semibold text-slate-500">
+      <span
+          v-for="day in weekDays"
+          :key="day"
+      >
+        {{ day }}
+      </span>
+            </div>
+
+            <div class="grid grid-cols-7 gap-1 text-center text-sm">
+              <div
+                  v-for="(day, index) in calendarDays"
+                  :key="index"
+                  class="flex aspect-square flex-col items-center justify-center rounded-full text-xs
+  transition"
+                  :class="[
+     !day.isCurrentMonth
+      ? 'text-transparent'
+      : selectedCalendarDay?.date?.toDateString() === day.date?.toDateString()
+        ? 'bg-slate-700 font-bold text-white ring-4 ring-violet-200 cursor-pointer'
+        : day.hasFocus
+          ? 'bg-violet-600 font-bold text-white cursor-pointer'
+          : 'text-slate-600 hover:bg-slate-200'
+    ]"
+                  :title="day.hasFocus ? `${day.sessions} сессий / ${day.minutes} мин` : ''"
+                  @click="selectCalendarDay(day)"
+              >
+                <span>{{ day.day }}</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
       </div>
 
       <div class="mb-6 flex flex-wrap justify-center gap-2">
