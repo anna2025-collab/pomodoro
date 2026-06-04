@@ -16,6 +16,19 @@ const calendarDate = ref(new Date())
 const focusSessions = ref([])
 const selectedCalendarDay = ref(null)
 
+const pageBackgroundClass = computed(() => {
+  if (isRunning.value && currentMode.value === 'focus') {
+    return 'bg-gradient-to-r from-violet-600 via-emerald-100 to-violet-400'
+
+  }
+
+  if (currentMode.value === 'shortBreak' || currentMode.value === 'longBreak') {
+    return 'bg-slate-300'
+  }
+
+  return 'bg-gradient-to-br from-violet-900 via-purple-950 to-slate-950'
+})
+
 const selectedCalendarMonthLabel = computed(() => {
   if (!selectedCalendarDay.value?.date) {
     return ''
@@ -310,9 +323,11 @@ const resetLocalStats = () => {
 </script>
 
 <template>
-  <main class="flex min-h-screen items-center justify-center bg-gradient-to-br from-violet-
-  900 via-purple-950 to-slate-950">
-    <section class="w-full max-w-[520px] rounded-2xl bg-white p-8 text-center shadow-xl">
+  <main
+      class="flex min-h-screen items-center justify-center transition-colors duration-500"
+      :class="pageBackgroundClass"
+  >
+  <section class="w-full max-w-[520px] rounded-2xl bg-white p-8 text-center shadow-xl">
       <h1 class="mb-4 text-3xl font-bold !text-violet-900">
         Pomodoro Timer
       </h1>
