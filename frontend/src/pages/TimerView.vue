@@ -16,17 +16,42 @@ const calendarDate = ref(new Date())
 const focusSessions = ref([])
 const selectedCalendarDay = ref(null)
 
+const clearProgressStats = async () => {
+  if (props.isAuth) {
+    const token = localStorage.getItem('token')
+
+    const response = await fetch('http://localhost:8080/api/focus-sessions', {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+
+    if (!response.ok) {
+      statusMessage.value = 'Не удалось очистить статистику'
+      return
+    }
+  }
+
+  focusSessions.value = []
+  completedFocusSessions.value = 0
+  totalFocusSeconds.value = 0
+  todayFocusSessions.value = 0
+  todayFocusSeconds.value = 0
+  selectedCalendarDay.value = null
+  localStorage.removeItem('completedFocusSessions')}
+
+
 const pageBackgroundClass = computed(() => {
-  if (isRunning.value && currentMode.value === 'focus') {
-    return 'bg-gradient-to-r from-violet-600 via-emerald-100 to-violet-400'
-
+  if (!isRunning.value) {
+    return 'bg-gradient-to-br from-violet-900 via-purple-950 to-slate-950'
   }
-
-  if (currentMode.value === 'shortBreak' || currentMode.value === 'longBreak') {
-    return 'bg-slate-300'
+  if (currentMode.value === 'focus') {
+    return 'bg-gradient-to-r from-violet-500 via-emerald-200 to-violet-500'
   }
+  return 'bg-gradient-to-r from-emerald-400 via-violet-200 to-violet-500'
 
-  return 'bg-gradient-to-br from-violet-900 via-purple-950 to-slate-950'
 })
 
 const selectedCalendarMonthLabel = computed(() => {
@@ -324,26 +349,29 @@ const resetLocalStats = () => {
 
 <template>
   <main
-      class="flex min-h-screen items-center justify-center transition-colors duration-500"
+      class="flex min-h-screen w-full items-center justify-center transition-colors duration-
+    500"
       :class="pageBackgroundClass"
   >
-  <section class="w-full max-w-[520px] rounded-2xl bg-white p-8 text-center shadow-xl">
-      <h1 class="mb-4 text-3xl font-bold !text-violet-900">
-        Pomodoro Timer
-      </h1>
 
+  <section class="relative w-full max-w-[520px] rounded-2xl bg-white p-8 text-center shadow-
+  xl">
       <button
           v-if="isAuth"
           type="button"
-          class="mb-6 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-semibold text-
-  slate-700 transition hover:border-black hover:text-black"
+          class="absolute right-6 top-6 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-
+    semibold text-slate-700 transition hover:border-black hover:text-black"
           @click="emit('logout')"
       >
         Выйти
       </button>
 
+      <h1 class="mb-4 text-3xl font-bold !text-violet-900">
+        Pomodoro Timer
+      </h1>
+
       <button
-          v-else
+          v-if="!isAuth"
           type="button"
           class="mb-6 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-semibold text-
   slate-700 transition hover:border-black hover:text-black"
@@ -381,17 +409,28 @@ const resetLocalStats = () => {
             Сбросить
           </button>
         </template>
+
       </div>
       <div
           v-if="showProgress"
           class="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4 text-left"
       >
         <div class="mb-3 flex items-center justify-between gap-3">
-          <h2 class="text-lg font-bold text-slate-900">
+          <h2 class="text-lg font-bold !text-violet-900">
             Прогресс
           </h2>
-
-          <button
+          <div class="flex items-center gap-2">
+            <button
+                type="button"
+                class="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300
+        text-xs font-bold text-violet-700 transition hover:border-violet-600 hover:bg-violet-
+        50"
+                title="Очистить статистику"
+                @click="clearProgressStats"
+            >
+              ×
+            </button>
+            <button
               type="button"
               class="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-
   700 transition hover:border-black hover:text-black"
@@ -399,6 +438,7 @@ const resetLocalStats = () => {
           >
             Закрыть
           </button>
+        </div>
         </div>
 
         <div class="grid gap-2 text-sm text-slate-700">
@@ -493,7 +533,7 @@ const resetLocalStats = () => {
       <p v-if="statusMessage" class="mb-6 text-sm font-semibold text-violet-700">
         {{ statusMessage }}
       </p>
-
+    <div class="relative flex items-center justify-center">
       <div class="flex justify-center gap-3">
         <button
             type="button"
@@ -514,6 +554,9 @@ const resetLocalStats = () => {
           Сброс
         </button>
       </div>
+
+      </div>
+
     </section>
   </main>
 </template>
