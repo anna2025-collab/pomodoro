@@ -349,18 +349,14 @@ const resetLocalStats = () => {
 
 <template>
   <main
-      class="flex min-h-screen w-full items-center justify-center transition-colors duration-
-    500"
+      class="flex min-h-screen w-full flex-col items-center justify-center gap-6 p-6 transition-colors duration-500 lg:flex-row"
       :class="pageBackgroundClass"
   >
-
-  <section class="relative w-full max-w-[520px] rounded-2xl bg-white p-8 text-center shadow-
-  xl">
+    <section class="relative w-full max-w-[520px] rounded-2xl bg-white p-8 text-center shadow-xl">
       <button
           v-if="isAuth"
           type="button"
-          class="absolute right-6 top-6 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-
-    semibold text-slate-700 transition hover:border-black hover:text-black"
+          class="absolute right-6 top-6 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-black hover:text-black"
           @click="emit('logout')"
       >
         Выйти
@@ -373,24 +369,21 @@ const resetLocalStats = () => {
       <button
           v-if="!isAuth"
           type="button"
-          class="mb-6 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-semibold text-
-  slate-700 transition hover:border-black hover:text-black"
+          class="mb-6 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-black hover:text-black"
           @click="emit('show-login')"
       >
         Войти
       </button>
 
-      <div class="mb-6 flex items-center justify-center gap-3 text-sm font-semibold text-slate-
-  700">
+      <div class="mb-6 flex items-center justify-center gap-3 text-sm font-semibold text-slate-700">
         <template v-if="isAuth">
-      <span>
-        Сегодня: {{ todayFocusSessions }} сессий / {{ todayFocusMinutes }} мин
-      </span>
+          <span>
+            Сегодня: {{ todayFocusSessions }} сессий / {{ todayFocusMinutes }} мин
+          </span>
 
           <button
               type="button"
-              class="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-
-  700 transition hover:border-black hover:text-black"
+              class="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 transition hover:border-black hover:text-black"
               @click="showProgress = true"
           >
             Прогресс
@@ -402,114 +395,12 @@ const resetLocalStats = () => {
 
           <button
               type="button"
-              class="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-
-  700 transition hover:border-black hover:text-black"
+              class="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 transition hover:border-black hover:text-black"
               @click="resetLocalStats"
           >
             Сбросить
           </button>
         </template>
-
-      </div>
-      <div
-          v-if="showProgress"
-          class="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4 text-left"
-      >
-        <div class="mb-3 flex items-center justify-between gap-3">
-          <h2 class="text-lg font-bold !text-violet-900">
-            Прогресс
-          </h2>
-          <div class="flex items-center gap-2">
-            <button
-                type="button"
-                class="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300
-        text-xs font-bold text-violet-700 transition hover:border-violet-600 hover:bg-violet-
-        50"
-                title="Очистить статистику"
-                @click="clearProgressStats"
-            >
-              ×
-            </button>
-            <button
-              type="button"
-              class="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-
-  700 transition hover:border-black hover:text-black"
-              @click="showProgress = false"
-          >
-            Закрыть
-          </button>
-        </div>
-        </div>
-
-        <div class="grid gap-2 text-sm text-slate-700">
-          <p>Всего сессий: {{ completedFocusSessions }}</p>
-          <p>Всего минут: {{ totalFocusMinutes }}</p>
-          <p>Сегодня: {{ todayFocusSessions }} сессий / {{ todayFocusMinutes }} мин</p>
-          <p v-if="selectedCalendarDay">
-            Выбрано: {{ selectedCalendarDay.day }} {{ selectedCalendarMonthLabel }} -
-            {{ selectedCalendarDay.sessions }} сессий /
-            {{ selectedCalendarDay.minutes }} мин
-          </p>
-
-          <div class="mt-5">
-            <div class="mb-3 flex items-center justify-between">
-              <button
-                  type="button"
-                  class="rounded-md px-2 py-1 text-slate-500 transition hover:bg-slate-200 hover:text-
-  slate-900"
-                  @click="previousCalendarMonth"
-              >
-                ‹
-              </button>
-
-              <h3 class="font-semibold capitalize text-slate-900">
-                {{ calendarMonthLabel }}
-              </h3>
-
-              <button
-                  type="button"
-                  class="rounded-md px-2 py-1 text-slate-500 transition hover:bg-slate-200 hover:text-
-  slate-900"
-                  @click="nextCalendarMonth"
-              >
-                ›
-              </button>
-            </div>
-
-            <div class="mb-2 grid grid-cols-7 gap-1 text-center text-xs font-semibold text-slate-500">
-      <span
-          v-for="day in weekDays"
-          :key="day"
-      >
-        {{ day }}
-      </span>
-            </div>
-
-            <div class="grid grid-cols-7 gap-1 text-center text-sm">
-              <div
-                  v-for="(day, index) in calendarDays"
-                  :key="index"
-                  class="flex aspect-square flex-col items-center justify-center rounded-full text-xs
-  transition"
-                  :class="[
-     !day.isCurrentMonth
-      ? 'text-transparent'
-      : selectedCalendarDay?.date?.toDateString() === day.date?.toDateString()
-        ? 'bg-slate-700 font-bold text-white ring-4 ring-violet-200 cursor-pointer'
-        : day.hasFocus
-          ? 'bg-violet-600 font-bold text-white cursor-pointer'
-          : 'text-slate-600 hover:bg-slate-200'
-    ]"
-                  :title="day.hasFocus ? `${day.sessions} сессий / ${day.minutes} мин` : ''"
-                  @click="selectCalendarDay(day)"
-              >
-                <span>{{ day.day }}</span>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
       </div>
 
       <div class="mb-6 flex flex-wrap justify-center gap-2">
@@ -519,8 +410,8 @@ const resetLocalStats = () => {
             type="button"
             class="rounded-lg border px-3 py-2 text-sm font-semibold transition"
             :class="currentMode === key
-        ? 'border-violet-600 bg-violet-600 text-white'
-        : 'border-slate-300 text-slate-700 hover:border-black hover:text-black'"
+              ? 'border-violet-600 bg-violet-600 text-white'
+              : 'border-slate-300 text-slate-700 hover:border-black hover:text-black'"
             @click="selectMode(key)"
         >
           {{ mode.label }}
@@ -530,15 +421,15 @@ const resetLocalStats = () => {
       <div class="mb-8 text-7xl font-bold text-slate-950">
         {{ formattedTime }}
       </div>
+
       <p v-if="statusMessage" class="mb-6 text-sm font-semibold text-violet-700">
         {{ statusMessage }}
       </p>
-    <div class="relative flex items-center justify-center">
+
       <div class="flex justify-center gap-3">
         <button
             type="button"
-            class="rounded-lg bg-violet-500 px-5 py-3 font-semibold text-white transition
-  hover:bg-violet-600"
+            class="rounded-lg bg-violet-500 px-5 py-3 font-semibold text-white transition hover:bg-violet-600"
             @click="toggleTimer"
         >
           {{ isRunning ? 'Пауза' : 'Старт' }}
@@ -546,17 +437,108 @@ const resetLocalStats = () => {
 
         <button
             type="button"
-            class="rounded-lg border border-slate-300 px-5 py-3 font-semibold text-slate-900
-  transition hover:border-black"
+            class="rounded-lg border border-slate-300 px-5 py-3 font-semibold text-slate-900 transition hover:border-black"
             @click="resetTimer"
-
         >
           Сброс
         </button>
       </div>
+    </section>
 
+    <aside
+        v-if="showProgress"
+        class="w-full max-w-[460px] rounded-2xl border border-slate-200 bg-white/95 p-4 text-left shadow-xl"
+    >
+      <div class="mb-3 flex items-center justify-between gap-3">
+        <h2 class="text-lg font-bold !text-violet-900">
+          Прогресс
+        </h2>
+
+        <div class="flex items-center gap-2">
+          <button
+              type="button"
+              class="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-xs font-bold text-violet-700 transition hover:border-violet-600 hover:bg-violet-50"
+              title="Очистить статистику"
+              @click="clearProgressStats"
+          >
+            ×
+          </button>
+
+          <button
+              type="button"
+              class="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 transition hover:border-black hover:text-black"
+              @click="showProgress = false"
+          >
+            Закрыть
+          </button>
+        </div>
       </div>
 
-    </section>
+      <div class="grid gap-2 text-sm text-slate-700">
+        <p>Всего сессий: {{ completedFocusSessions }}</p>
+        <p>Всего минут: {{ totalFocusMinutes }}</p>
+        <p>Сегодня: {{ todayFocusSessions }} сессий / {{ todayFocusMinutes }} мин</p>
+
+        <p v-if="selectedCalendarDay">
+          Выбрано: {{ selectedCalendarDay.day }} {{ selectedCalendarMonthLabel }} -
+          {{ selectedCalendarDay.sessions }} сессий /
+          {{ selectedCalendarDay.minutes }} мин
+        </p>
+
+        <div class="mt-5">
+          <div class="mb-3 flex items-center justify-between">
+            <button
+                type="button"
+                class="rounded-md px-2 py-1 text-slate-500 transition hover:bg-slate-200 hover:text-slate-900"
+                @click="previousCalendarMonth"
+            >
+              ‹
+            </button>
+
+            <h3 class="font-semibold capitalize text-slate-900">
+              {{ calendarMonthLabel }}
+            </h3>
+
+            <button
+                type="button"
+                class="rounded-md px-2 py-1 text-slate-500 transition hover:bg-slate-200 hover:text-slate-900"
+                @click="nextCalendarMonth"
+            >
+              ›
+            </button>
+          </div>
+
+          <div class="mb-2 grid grid-cols-7 gap-1 text-center text-xs font-semibold text-slate-500">
+            <span
+                v-for="day in weekDays"
+                :key="day"
+            >
+              {{ day }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-7 gap-1 text-center text-sm">
+            <div
+                v-for="(day, index) in calendarDays"
+                :key="index"
+                class="flex aspect-square flex-col items-center justify-center rounded-full text-xs transition"
+                :class="[
+                  !day.isCurrentMonth
+                    ? 'text-transparent'
+                    : selectedCalendarDay?.date?.toDateString() === day.date?.toDateString()
+                      ? 'bg-slate-700 font-bold text-white ring-4 ring-violet-200 cursor-pointer'
+                      : day.hasFocus
+                        ? 'bg-violet-600 font-bold text-white cursor-pointer'
+                        : 'text-slate-600 hover:bg-slate-200'
+                ]"
+                :title="day.hasFocus ? `${day.sessions} сессий / ${day.minutes} мин` : ''"
+                @click="selectCalendarDay(day)"
+            >
+              <span>{{ day.day }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
   </main>
 </template>
