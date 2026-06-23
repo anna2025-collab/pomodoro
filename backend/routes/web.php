@@ -17,7 +17,11 @@ Route::get('api/message', function () {
     ]);
 });
 Route::post('/api/reverse-text', function (\Illuminate\Http\Request $request) {
-    $text = $request->input('text', '');
+    $request->validate([
+        'text' => ['required', 'string'],
+    ]);
+
+    $text = $request->string('text')->toString();
 
     $reversedText = mb_strrev($text);
 
@@ -27,7 +31,13 @@ Route::post('/api/reverse-text', function (\Illuminate\Http\Request $request) {
     ]);
 });
 
-function mb_strrev($string)
+function mb_strrev(string $string): string
 {
-    return implode('', array_reverse(preg_split('//u', $string, -1, PREG_SPLIT_NO_EMPTY)));
+    $characters = preg_split('//u', $string, -1, PREG_SPLIT_NO_EMPTY);
+
+    if ($characters === false) {
+        return '';
+    }
+
+    return implode('', array_reverse($characters));
 }
