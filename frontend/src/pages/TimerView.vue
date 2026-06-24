@@ -1,7 +1,7 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import {computed, onMounted, ref} from 'vue'
 
-const emit = defineEmits(['logout','show-login'])
+const emit = defineEmits(['logout', 'show-login'])
 const totalSeconds = ref(25 * 60)
 const isRunning = ref(false)
 const intervalId = ref(null)
@@ -40,7 +40,8 @@ const clearProgressStats = async () => {
   todayFocusSessions.value = 0
   todayFocusSeconds.value = 0
   selectedCalendarDay.value = null
-  localStorage.removeItem('completedFocusSessions')}
+  localStorage.removeItem('completedFocusSessions')
+}
 
 
 const pageBackgroundClass = computed(() => {
@@ -369,7 +370,8 @@ const resetLocalStats = () => {
       <button
           v-if="!isAuth"
           type="button"
-          class="mb-6 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-black hover:text-black"
+          class="absolute right-6 top-6 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-
+  semibold text-slate-700 transition hover:border-black hover:text-black"
           @click="emit('show-login')"
       >
         Войти
@@ -455,21 +457,14 @@ const resetLocalStats = () => {
         </h2>
 
         <div class="flex items-center gap-2">
-          <button
-              type="button"
-              class="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-xs font-bold text-violet-700 transition hover:border-violet-600 hover:bg-violet-50"
-              title="Очистить статистику"
-              @click="clearProgressStats"
-          >
-            ×
-          </button>
+
 
           <button
               type="button"
-              class="rounded-md border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 transition hover:border-black hover:text-black"
+              class="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-xs font-bold text-violet-700 transition hover:border-violet-600 hover:bg-violet-50"
+              title="Закрыть"
               @click="showProgress = false"
-          >
-            Закрыть
+          >×
           </button>
         </div>
       </div>

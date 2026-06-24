@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="pomodoro_test@127.0.0.1" uuid="04ff6d5e-a50b-4130-9d06-55cbcc8bc635">
+      <driver-ref>mysql_aurora.aws_wrapper</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>software.amazon.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:aws-wrapper:mysql://127.0.0.1:3307/pomodoro_test</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="laravel@127.0.0.1" uuid="dd3121c8-2301-4d08-8301-dfcfb7d244fa">
+      <driver-ref>mysql_aurora.aws_wrapper</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>software.amazon.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:aws-wrapper:mysql://127.0.0.1:3307/laravel</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+  </component>
+</project>
