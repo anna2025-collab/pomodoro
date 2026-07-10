@@ -1,7 +1,6 @@
 <script setup>
 import { reactive, ref } from 'vue'
-const emit = defineEmits(['show-login'])
-
+const emit = defineEmits(['show-login','login-success'])
 const form = reactive({
   name: '',
   email: '',
@@ -42,6 +41,7 @@ const submit = async () => {
 
     localStorage.setItem('token', data.token)
     localStorage.setItem('user', JSON.stringify(data.user))
+    emit('login-success')
 
     message.value = 'Регистрация прошла успешно'
 

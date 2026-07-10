@@ -15,5 +15,12 @@
       <jdbc-url>jdbc:aws-wrapper:mysql://127.0.0.1:3307/laravel</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="pomodoro.сервер база@127.0.0.1" uuid="6b7e7f52-08c0-41fb-80ff-440d786920f5">
+      <driver-ref>mysql.8</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://127.0.0.1:3306/pomodoro</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

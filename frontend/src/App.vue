@@ -32,6 +32,7 @@ const logout = () => {
   <RegisterView
       v-else
       @show-login="currentView = 'login'"
+      @login-success="isAuth = true; currentView = 'timer'"
   />
 </template>
 
