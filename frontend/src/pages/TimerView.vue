@@ -492,9 +492,15 @@ const resetLocalStats = () => {
         {{ formattedTime }}
       </div>
 
-      <p v-if="statusMessage" class="mb-6 text-sm font-semibold text-violet-700">
-        {{ statusMessage }}
-      </p>
+      <div
+          v-if="statusMessage"
+          class="mb-4 mt-2 flex justify-center"
+      >
+        <p class="text-center text-base font-semibold text-purple-700">
+          {{ statusMessage }}
+        </p>
+      </div>
+
 
       <div class="flex justify-center gap-3">
         <button
