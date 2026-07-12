@@ -418,9 +418,8 @@ const resetLocalStats = () => {
 
 <template>
   <main
-      class="relative flex min-h-screen w-full flex-col items-center justify-center gap-6 p-6 pb-
-  24 transition-colors duration-500 lg:flex-row"
-
+      class="flex min-h-screen w-full flex-col items-center justify-center gap-6 p-6 transition-colors duration-500 lg:flex-row"
+      :class="pageBackgroundClass"
   >
     <section class="relative w-full max-w-[520px] rounded-2xl bg-white p-8 text-center shadow-xl">
       <button
@@ -610,12 +609,5 @@ const resetLocalStats = () => {
         </div>
       </div>
     </aside>
-    <div class="absolute bottom-8 left-1/2 w-full max-w-md -translate-x-1/2 px-4">
-      <div class="rounded-full border border-white px-12 py-2 text-center text-sm font-
-        semibold text-white">
-        by Anna Kuznetsova
-      </div>
-    </div>
   </main>
 </template>
-
