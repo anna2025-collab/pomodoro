@@ -1,5 +1,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
+import { apiUrl } from '../../lib/api'
+
 const emit = defineEmits(['show-register','login-success'])
 
 const form = reactive({
@@ -17,7 +19,7 @@ const submit = async () => {
   message.value = ''
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
+    const response = await fetch(apiUrl('/login'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

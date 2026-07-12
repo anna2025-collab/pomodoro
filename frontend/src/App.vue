@@ -11,7 +11,7 @@ const logout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('user')
   isAuth.value = false
-  authView.value = 'login'
+  currentView.value = 'login'
 }
 
 </script>
@@ -35,4 +35,3 @@ const logout = () => {
       @login-success="isAuth = true; currentView = 'timer'"
   />
 </template>
-
