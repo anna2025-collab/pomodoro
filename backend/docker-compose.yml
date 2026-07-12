@@ -33,7 +33,6 @@ services:
         - /app/node_modules
     environment:
         - CHOKIDAR_USEPOLLING=true
-        - VITE_API_PROXY_TARGET=http://nginx
 
   db:
     image: mysql:8.4

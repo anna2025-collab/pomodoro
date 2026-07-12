@@ -1,4 +1,4 @@
-const apiBaseUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '')
+const apiBaseUrl = '/api'
 
 export const apiUrl = (path) => {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`
