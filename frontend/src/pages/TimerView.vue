@@ -11,6 +11,72 @@ const completedFocusSessions = ref(Number(localStorage.getItem('completedFocusSe
     0))
 const totalFocusSeconds = ref(0)
 const statusMessage = ref('')
+let completionAudioContext = null
+
+const getCompletionAudioContext = () => {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext
+
+  if (!AudioContextClass) {
+    return null
+  }
+
+  if (!completionAudioContext) {
+    completionAudioContext = new AudioContextClass()
+  }
+
+  return completionAudioContext
+}
+
+const unlockCompletionSound = async () => {
+  const audioContext = getCompletionAudioContext()
+
+  if (!audioContext) {
+    return
+  }
+
+  if (audioContext.state === 'suspended') {
+    await audioContext.resume()
+  }
+}
+
+const playCompletionSound = async () => {
+  const audioContext = getCompletionAudioContext()
+
+  if (!audioContext) {
+    return
+  }
+
+  if (audioContext.state === 'suspended') {
+    await audioContext.resume()
+  }
+
+  const now = audioContext.currentTime
+  const tones = [
+    { start: 0, frequency: 880 },
+    { start: 0.18, frequency: 988 },
+    { start: 0.36, frequency: 1175 },
+  ]
+
+  tones.forEach(({ start, frequency }) => {
+    const oscillator = audioContext.createOscillator()
+    const gain = audioContext.createGain()
+
+    oscillator.type = 'sine'
+    oscillator.frequency.setValueAtTime(frequency, now + start)
+
+    gain.gain.setValueAtTime(0.0001, now + start)
+    gain.gain.exponentialRampToValueAtTime(0.18, now + start + 0.015)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + start + 0.14)
+
+    oscillator.connect(gain)
+    gain.connect(audioContext.destination)
+
+    oscillator.start(now + start)
+    oscillator.stop(now + start + 0.16)
+  })
+}
+
+
 const showProgress = ref(false)
 const calendarDate = ref(new Date())
 const focusSessions = ref([])
@@ -143,6 +209,7 @@ const startTimer = () => {
   if (isRunning.value) {
     return
   }
+  void unlockCompletionSound()
 
   isRunning.value = true
   endTime.value = Date.now() + totalSeconds.value * 1000
@@ -190,6 +257,7 @@ const completeTimer = async () => {
   intervalId.value = null
   isRunning.value = false
   endTime.value = null
+  void playCompletionSound()
 
   if (currentMode.value === 'focus') {
     completedFocusSessions.value++
