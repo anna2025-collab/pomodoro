@@ -86,7 +86,7 @@ const clearProgressStats = async () => {
   if (props.isAuth) {
     const token = localStorage.getItem('token')
 
-    const response = await fetch('http://localhost:8080/api/focus-sessions', {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/focus-sessions`, {
       method: 'DELETE',
       headers: {
         'Accept': 'application/json',
@@ -285,7 +285,7 @@ const saveFocusSession = async () => {
   }
   const token = localStorage.getItem('token')
 
-  const response = await fetch('http://localhost:8080/api/focus-sessions', {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/focus-sessions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -315,7 +315,7 @@ const loadFocusSessions = async () => {
 
   const token = localStorage.getItem('token')
 
-  const response = await fetch('http://localhost:8080/api/focus-sessions', {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/focus-sessions`, {
     headers: {
       'Accept': 'application/json',
       'Authorization': `Bearer ${token}`,
