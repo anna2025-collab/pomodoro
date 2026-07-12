@@ -1,6 +1,5 @@
 <script setup>
 import { reactive, ref } from 'vue'
-import { apiUrl } from '../../lib/api'
 
 const emit = defineEmits(['show-register','login-success'])
 
@@ -19,7 +18,7 @@ const submit = async () => {
   message.value = ''
 
   try {
-    const response = await fetch(apiUrl('/login'), {
+    const response = await fetch('/api/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

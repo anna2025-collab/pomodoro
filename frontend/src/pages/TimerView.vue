@@ -1,6 +1,5 @@
 <script setup>
 import {computed, onMounted, ref} from 'vue'
-import { apiUrl } from '../lib/api'
 
 const emit = defineEmits(['logout', 'show-login'])
 const totalSeconds = ref(25 * 60)
@@ -87,7 +86,7 @@ const clearProgressStats = async () => {
   if (props.isAuth) {
     const token = localStorage.getItem('token')
 
-    const response = await fetch(apiUrl('/focus-sessions'), {
+    const response = await fetch('/api/focus-sessions', {
       method: 'DELETE',
       headers: {
         'Accept': 'application/json',
@@ -286,7 +285,7 @@ const saveFocusSession = async () => {
   }
   const token = localStorage.getItem('token')
 
-  const response = await fetch(apiUrl('/focus-sessions'), {
+  const response = await fetch('/api/focus-sessions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -316,7 +315,7 @@ const loadFocusSessions = async () => {
 
   const token = localStorage.getItem('token')
 
-  const response = await fetch(apiUrl('/focus-sessions'), {
+  const response = await fetch('/api/focus-sessions', {
     headers: {
       'Accept': 'application/json',
       'Authorization': `Bearer ${token}`,
