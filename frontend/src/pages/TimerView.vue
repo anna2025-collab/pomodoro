@@ -609,5 +609,11 @@ const resetLocalStats = () => {
         </div>
       </div>
     </aside>
+    <div class="absolute bottom-5 left-5">
+      <div class="rounded-full border border-white/80 px-4 py-1 text-xs font-medium text-
+    white/90">
+        by Anna Kyznetsova
+      </div>
+    </div>
   </main>
 </template>
